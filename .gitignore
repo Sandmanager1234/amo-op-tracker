@@ -1,0 +1,6 @@
+/.env
+/.venv
+/credentials.json
+/logs
+/op_tracker_test.db
+/test_models.py
