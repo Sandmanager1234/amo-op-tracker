@@ -116,7 +116,7 @@ class Database:
                         Lead
                     ).where(
                         Lead.is_deleted == False,
-                        Lead.is_meeting == True,
+                        Lead.is_qual == True,
                         Lead.created_at >= start_ts,
                         Lead.created_at <= end_ts
                     )
@@ -128,7 +128,7 @@ class Database:
                         Lead
                     ).where(
                         Lead.is_deleted == False,
-                        Lead.is_meeting == True,
+                        Lead.is_record == True,
                         Lead.created_at >= start_ts,
                         Lead.created_at <= end_ts
                     )
@@ -152,7 +152,7 @@ class Database:
                         Lead
                     ).where(
                         Lead.is_deleted == False,
-                        Lead.is_meeting == True,
+                        Lead.is_selled == True,
                         Lead.created_at >= start_ts,
                         Lead.created_at <= end_ts
                     )
