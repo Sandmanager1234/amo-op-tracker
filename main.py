@@ -1,6 +1,6 @@
 import os
 import asyncio
-
+import time
 from loguru import logger
 from dotenv import load_dotenv
 from schedule import repeat, run_pending, every
@@ -36,8 +36,7 @@ async def set_statuses():
     await set_pipline_statuses(SUCCESS_PIPE, True)
 
 
-@repeat(every(5).minutes)
-async def main():
+async def polling_leads():
     amo_client.start_session()
     try:
         # Получение даты и воронок
@@ -79,6 +78,12 @@ async def main():
     finally:
         await amo_client.close_session()
 
+
+@repeat(every(5).minutes)
+def main():
+    asyncio.run(polling_leads())
+
+
 if __name__ == '__main__':
     load_dotenv()
     # Получение имени текущей директории
@@ -113,5 +118,5 @@ if __name__ == '__main__':
     # asyncio.run(main())
     while True:
         run_pending()
-
+        time.sleep(1)
         # time.sleep(1)  # Uncomment if you want to add a delay between checks
