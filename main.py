@@ -8,7 +8,7 @@ from schedule import repeat, run_pending, every
 from database import Database
 from amocrm import AmoCRMClient
 from database.models import Lead
-from kztime import get_today_info
+from kztime import get_today_info, get_last_week_list
 from googlesheet.googlesheets import GoogleSheets
 
 
@@ -39,40 +39,43 @@ async def set_statuses():
 async def polling_leads():
     amo_client.start_session()
     try:
-        # Получение даты и воронок
-        ts_beg, ts_end, day = get_today_info()
-        pipelines = [COMMON_PIPE, SUCCESS_PIPE]
-        # Получение сделок из БД
-        db_leads = await db.get_lead_ids(ts_beg, ts_end)
-        db_leads_deleted = await db.get_lead_ids(ts_beg, ts_end, deleted=True)
-        # Получение сделок из amo
-        leads_response : dict = await amo_client.get_leads(ts_beg, ts_end, pipelines)
-        leads = leads_response.get('_embedded', {}).get('leads', [])
-        next_page = leads_response.get('_links', {}).get('next', {}).get('href')
-        page = 2
-        if next_page:
-            while next_page:
-                next_response = await amo_client.get_leads(ts_beg, ts_end, pipelines, page=page)
-                leads.extend(next_response.get('_embedded', {}).get('leads', []))
-                next_page = next_response.get('_links', {}).get('next', {}).get('href')
-                page += 1
-        #Добавление и обновление сделок
-        resp_leads = set()
-        statuses = await db.get_statuses()
-        for lead_json in leads:
-            lead = Lead.from_json(lead_json, statuses)
-            resp_leads.add(lead.id)
-            if lead.id not in db_leads:
-                if lead.id not in db_leads_deleted:
-                    await db.add_lead(lead)
-            await db.update_lead(lead)
-        # "Удаляем" сделки, которые ушли в другую воронку
-        diff_leads = db_leads - resp_leads
-        for lead in diff_leads:
-            await db.delete_lead(lead)
-        # Отправка в гугл
-        statistic = await db.get_statistic(ts_beg, ts_end)
-        google.insert_statistic(statistic, day)
+        week = get_last_week_list()
+        for day in week:
+            logger.info(f'Обработка дня: {day}')
+            # Получение даты и воронок
+            ts_beg, ts_end, day = get_today_info(day)
+            pipelines = [COMMON_PIPE, SUCCESS_PIPE]
+            # Получение сделок из БД
+            db_leads = await db.get_lead_ids(ts_beg, ts_end)
+            db_leads_deleted = await db.get_lead_ids(ts_beg, ts_end, deleted=True)
+            # Получение сделок из amo
+            leads_response : dict = await amo_client.get_leads(ts_beg, ts_end, pipelines)
+            leads = leads_response.get('_embedded', {}).get('leads', [])
+            next_page = leads_response.get('_links', {}).get('next', {}).get('href')
+            page = 2
+            if next_page:
+                while next_page:
+                    next_response = await amo_client.get_leads(ts_beg, ts_end, pipelines, page=page)
+                    leads.extend(next_response.get('_embedded', {}).get('leads', []))
+                    next_page = next_response.get('_links', {}).get('next', {}).get('href')
+                    page += 1
+            #Добавление и обновление сделок
+            resp_leads = set()
+            statuses = await db.get_statuses()
+            for lead_json in leads:
+                lead = Lead.from_json(lead_json, statuses)
+                resp_leads.add(lead.id)
+                if lead.id not in db_leads:
+                    if lead.id not in db_leads_deleted:
+                        await db.add_lead(lead)
+                await db.update_lead(lead)
+            # "Удаляем" сделки, которые ушли в другую воронку
+            diff_leads = db_leads - resp_leads
+            for lead in diff_leads:
+                await db.delete_lead(lead)
+            # Отправка в гугл
+            statistic = await db.get_statistic(ts_beg, ts_end)
+            google.insert_statistic(statistic, day)
     except Exception as ex:
         logger.error(f'Не получилось получить сделки. Ошибка: {ex}')
     finally:
@@ -115,7 +118,7 @@ if __name__ == '__main__':
     db = Database()
     asyncio.run(start_db())
     # asyncio.run(db.dispose())
-    # asyncio.run(main())
+    # main()
     while True:
         run_pending()
         time.sleep(1)

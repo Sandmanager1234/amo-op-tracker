@@ -52,7 +52,7 @@ class GoogleSheets:
             ws = table.worksheet(sheet_name)
             margin = ws.find('КОЛ-ВО ОПЛАТ')
             row_id = margin.row - 1
-            col_id = 3 + today.day
+            col_id = 2 + today.day
             sell_amount = ws.cell(row_id, col_id).value
             sell_count = ws.cell(row_id + 1, col_id).value
             if not sell_amount:
@@ -94,6 +94,7 @@ class GoogleSheets:
             f'{sg.convert_num_to_letters(col_id)}{5}:{sg.convert_num_to_letters(col_id)}{16}',
             raw=False
         )
+        logger.info(f'Добавлена статистика за день: {today} в столбец {sg.convert_num_to_letters(col_id)}')
 
 
     
