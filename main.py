@@ -107,7 +107,8 @@ async def polling_leads():
             for lead in diff_leads:
                 await db.delete_lead(lead)
             # Получаем данные о звонках
-            mop_data = await get_mop_data(day)
+            users = await get_user_list()
+            mop_data = await get_mop_data(day, users)
             # Отправка в гугл
             statistic = await db.get_statistic(ts_beg, ts_end)
             google.insert_statistic(statistic, mop_data, day)
