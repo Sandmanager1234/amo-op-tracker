@@ -47,6 +47,7 @@ class AmoCRMClient:
         endpoint: str,
         params: Optional[Dict] = None,
         data: Optional[Dict] = None,
+        is_expected_html: bool = False
     ):
         """Приватный метод для выполнения HTTP-запросов к AmoCRM API с обработкой ошибок и логированием"""
         url = f"{self.base_url}{endpoint}"
@@ -81,6 +82,8 @@ class AmoCRMClient:
                     logger.error('Долгосрочный токен просрочен или неверно указан!')
                     return {}
                 response.raise_for_status()  # Генерируем исключение, если статус-код не 200-299
+                if is_expected_html:
+                    return await response.text('utf8')
                 return await response.json()  # Возвращаем JSON ответ
         except aiohttp.ClientResponseError as e:
             logger.error(f"Ошибка запроса: {e.status} {e.message}")
@@ -138,6 +141,19 @@ class AmoCRMClient:
     async def get_pipeline(self, pipeline_id):
         return await self._make_request("GET", f'/api/v4/leads/pipelines/{pipeline_id}')
 
+    async def get_users(self, page: int = 1):
+        params = {
+            'page': page
+        }
+        return await self._make_request('GET', '/api/v4/users/', params=params)
     
-
+    async def get_managers(self, dt, users: list):
+        params = {
+            'filter_date_from': f'{dt.day}.{dt.month}.{dt.year}',
+            'filter_date_to': f'{dt.day}.{dt.month}.{dt.year}',
+            'useFilter': 'y'
+        }
+        for i, user in enumerate(users):
+            params[f'filter[main_user][{i}]'] = user.id
+        return await self._make_request('GET', '/stats/calls/', params=params, is_expected_html=True)
     

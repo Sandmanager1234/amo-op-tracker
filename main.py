@@ -4,10 +4,12 @@ import time
 from loguru import logger
 from dotenv import load_dotenv
 from schedule import repeat, run_pending, every
+from bs4 import BeautifulSoup
 
 from database import Database
-from amocrm import AmoCRMClient
 from database.models import Lead
+from amocrm.models import User
+from amocrm import AmoCRMClient
 from kztime import get_today_info, get_last_week_list
 from googlesheet.googlesheets import GoogleSheets
 
@@ -36,14 +38,45 @@ async def set_statuses():
     await set_pipline_statuses(SUCCESS_PIPE, True)
 
 
+async def get_user_list():
+    # получаем список пользователей
+    users_response = await amo_client.get_users()
+    users = users_response.get('_embedded', {}).get('users', [])
+    next_page_users = users_response.get('_links', {}).get('next', {}).get('href')
+    page = 2
+    if next_page_users:
+        while next_page_users:
+            next_users_response = await amo_client.get_users(page=page)
+            users.extend(next_users_response.get('_embedded', {}).get('users', []))
+            next_page_users = next_users_response.get('_links', {}).get('next', {}).get('href')
+            page += 1
+    hunters = []
+    for user_json in users:
+        user = User.from_json(user_json)
+        print(user.id, user.group_id, os.getenv('group_id'))
+        if user.group_id == int(os.getenv('group_id')):
+            hunters.append(user)
+    return hunters
+
+
+async def get_mop_data(today, users):
+    page = await amo_client.get_managers(today, users)
+    soup = BeautifulSoup(page, 'lxml')
+    divs = soup.find_all('div', class_='calls_analytics_row')
+    count = len(divs) - 3
+    total = divs[-1].find('div', class_='calls_analytics__calls_graph__all')
+    return count, total.text
+
+
 async def polling_leads():
     amo_client.start_session()
     try:
         week = get_last_week_list()
-        for day in week:
-            logger.info(f'Обработка дня: {day}')
+        
+        for _day in week:
+            logger.info(f'Обработка дня: {_day}')
             # Получение даты и воронок
-            ts_beg, ts_end, day = get_today_info(day)
+            ts_beg, ts_end, day = get_today_info(_day)
             pipelines = [COMMON_PIPE, SUCCESS_PIPE]
             # Получение сделок из БД
             db_leads = await db.get_lead_ids(ts_beg, ts_end)
@@ -73,9 +106,14 @@ async def polling_leads():
             diff_leads = db_leads - resp_leads
             for lead in diff_leads:
                 await db.delete_lead(lead)
+            # Получаем данные о звонках
+            mop_data = await get_mop_data(day)
             # Отправка в гугл
             statistic = await db.get_statistic(ts_beg, ts_end)
-            google.insert_statistic(statistic, day)
+            google.insert_statistic(statistic, mop_data, day)
+        start_ts, _, last_day = get_today_info(week[-1])
+        record_statistic, day_count = await db.get_records(start_ts)
+        google.insert_records(record_statistic, day_count, last_day)
     except Exception as ex:
         logger.error(f'Не получилось получить сделки. Ошибка: {ex}')
     finally:
@@ -114,11 +152,10 @@ if __name__ == '__main__':
         client_secret=os.getenv("client_secret"),
         permanent_access_token=True
     )
-    
+
     db = Database()
     asyncio.run(start_db())
-    # asyncio.run(db.dispose())
-    # main()
+
     while True:
         run_pending()
         time.sleep(1)

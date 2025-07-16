@@ -12,6 +12,7 @@ class Lead(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     status: Mapped[str] = mapped_column()
     pipeline: Mapped[str] = mapped_column()
+    recorded_at: Mapped[int] = mapped_column(nullable=True)
     is_qual: Mapped[bool] = mapped_column(default=False)
     is_record: Mapped[bool] = mapped_column(default=False)
     is_meeting: Mapped[bool] = mapped_column(default=False)
@@ -67,6 +68,7 @@ class Lead(Base):
             match field.get("field_name", None):
                 case 'Время встречи':
                     self.is_record = True
+                    self.recorded_at = self.__get_value_from_json(field)
                 case 'ЗНР причина':
                     reject_reason = self.__get_value_from_json(field)
                 case _:
@@ -99,10 +101,11 @@ class Lead(Base):
         self.is_record |= lead.is_record
         self.is_selled |= lead.is_selled
         self.is_deleted &= lead.is_deleted
+        self.recorded_at = lead.recorded_at
         if statuses.get(self.pipeline, {}).get(self.status, -1) < statuses.get(lead.pipeline, {}).get(lead.status, -1) :
             self.pipeline = lead.pipeline
             self.status = lead.status
-
+        
     def __str__(self):
         return f'id: {self.id}; pipeline: {self.pipeline}; status: {self.status}'
     

@@ -4,6 +4,7 @@ from sqlalchemy.sql import func
 from database.models import Base, Lead, Status
 from loguru import logger
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from kztime import get_local_datetime
 
 
 class Database:
@@ -25,6 +26,7 @@ class Database:
             logger.info("Таблицы не найдены, создание новых")
             await self.create_tables()
         else:
+            Base.metadata.reflect
             logger.info("Таблицы cуществуют, проверка завершена") 
 
     async def create_tables(self):
@@ -165,6 +167,33 @@ class Database:
                     selled.scalars().first()
                 )
             
+    async def get_records(self, start_ts: int):
+        async with self.async_session() as session:
+            async with session.begin():
+                sql_response = await session.execute(
+                    sqlalchemy.select(
+                        Lead.recorded_at
+                    ).select_from(
+                        Lead
+                    ).where(
+                        Lead.recorded_at >= start_ts
+                    )
+                )
+                records = sql_response.scalars().fetchall()  
+                record_statistic = {}   
+                day_count = 0      
+                for record in records:
+                    local_record = get_local_datetime(record)
+                    if local_record.year not in record_statistic:
+                        record_statistic[local_record.year] = {}
+                    if local_record.month not in record_statistic[local_record.year]:
+                        record_statistic[local_record.year][local_record.month] = {}
+                    if local_record.day not in record_statistic[local_record.month]:
+                        day_count += 1
+                        record_statistic[local_record.year][local_record.month][local_record.day] = 0
+                    record_statistic[local_record.month][local_record.day] += 1
+                return record_statistic, day_count
+
 
 async def test():
     db = Database()

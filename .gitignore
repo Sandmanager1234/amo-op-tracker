@@ -5,3 +5,5 @@
 /op_tracker_test.db
 /test_models.py
 __pycache__
+alembic.ini
+migrations

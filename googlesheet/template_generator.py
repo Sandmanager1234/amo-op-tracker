@@ -50,11 +50,13 @@ class TemplateGenerator():
             weeknum = ((today - datetime.timedelta(days=weekday - 7)).day // 7)
         return weeknum, month
 
-    def get_formula_row(self, weeks_ids: list, row_num: int):
+    def get_formula_row(self, weeks_ids: list, row_num: int, is_avg: bool = False):
         symbs = []
         for week_id in weeks_ids:
             symbs.append(f'{self.convert_num_to_letters(week_id)}{row_num}')
         sum_vars = '+'.join(symbs)
+        if is_avg:
+            return f'=({sum_vars})/{len(weeks_ids)}'
         return f'={sum_vars}'
 
 
@@ -77,12 +79,18 @@ class TemplateGenerator():
                 'СV_2(%) | c квал на запись во встречу',
                 'кол-во записей',
                 'СV_3(%) | c записи на встречу',
+                'кол-во встреч на этот день',
                 'кол-во встреч',
                 'СV_4(%) | cо встречи на продажу',
                 'кол-во продаж',
                 'Сумма Продаж',
                 'средний чек',
-                'СV_5(%) | c заявки в продажу'
+                'СV_5(%) | c заявки в продажу',
+                '',
+                'Кол-во менеджеров',
+                'Продажи на 1 менеджера',
+                'Кол-во дозвонов',
+                'Кол-во дозвона на 1 менеджера в день'
             ]
         )
         cols.append(['', '', 'План'])
@@ -95,18 +103,24 @@ class TemplateGenerator():
                 self.get_formula_row(weeks_ids, 5),
                 '=D7/D5',
                 self.get_formula_row(weeks_ids, 7),
-                '=D9/D7',
+                '=D10/D7',
                 self.get_formula_row(weeks_ids, 9),
-                '=D11/D9',
+                self.get_formula_row(weeks_ids, 10),
+                '=D12/D10',
                 self.get_formula_row(weeks_ids, 11),
-                '=D13/D11',
+                '=D14/D12',
                 self.get_formula_row(weeks_ids, 13),
                 self.get_formula_row(weeks_ids, 14),
-                '=D14/D13',
-                '=D13/D5'
+                '=D15/D14',
+                '=D14/D5',
+                '',
+                self.get_formula_row(weeks_ids, 19, is_avg=True), 
+                '=D15/D19',
+                self.get_formula_row(weeks_ids, 21),
+                self.get_formula_row(weeks_ids, 22, is_avg=True) 
             ]
         )
-        cols.append(['', '', 'Проекция', '', '', '', '', '', '', '', '', '', '', f'=D14/(СЕГОДНЯ()-H3)*30'])
+        cols.append(['', '', 'Проекция', '', '', '', '', '', '', '', '', '', '', '', f'=D14/(СЕГОДНЯ()-H3)*30'])
         for i, week in enumerate(weeks):
             cols.append(['', '', f'Неделя - {i + 1}', 'План'])
             week_id = weeks_ids[i]
@@ -121,13 +135,19 @@ class TemplateGenerator():
                     f'=СУММ({self.convert_num_to_letters(week_id + 1)}7:{self.convert_num_to_letters(week_id + 7)}7)',
                     f'={self.convert_num_to_letters(week_id)}9/{self.convert_num_to_letters(week_id)}7',
                     f'=СУММ({self.convert_num_to_letters(week_id + 1)}9:{self.convert_num_to_letters(week_id + 7)}9)',
-                    f'={self.convert_num_to_letters(week_id)}11/{self.convert_num_to_letters(week_id)}9',
-                    f'=СУММ({self.convert_num_to_letters(week_id + 1)}11:{self.convert_num_to_letters(week_id + 7)}11)',
-                    f'={self.convert_num_to_letters(week_id)}13/{self.convert_num_to_letters(week_id)}11',
-                    f'=СУММ({self.convert_num_to_letters(week_id + 1)}13:{self.convert_num_to_letters(week_id + 7)}13)',
+                    f'=СУММ({self.convert_num_to_letters(week_id + 1)}10:{self.convert_num_to_letters(week_id + 7)}10)',
+                    f'={self.convert_num_to_letters(week_id)}12/{self.convert_num_to_letters(week_id)}10',
+                    f'=СУММ({self.convert_num_to_letters(week_id + 1)}12:{self.convert_num_to_letters(week_id + 7)}12)',
+                    f'={self.convert_num_to_letters(week_id)}14/{self.convert_num_to_letters(week_id)}12',
                     f'=СУММ({self.convert_num_to_letters(week_id + 1)}14:{self.convert_num_to_letters(week_id + 7)}14)',
-                    f'={self.convert_num_to_letters(week_id)}14/{self.convert_num_to_letters(week_id)}13',
-                    f'={self.convert_num_to_letters(week_id)}13/{self.convert_num_to_letters(week_id)}5'
+                    f'=СУММ({self.convert_num_to_letters(week_id + 1)}15:{self.convert_num_to_letters(week_id + 7)}15)',
+                    f'={self.convert_num_to_letters(week_id)}15/{self.convert_num_to_letters(week_id)}14',
+                    f'={self.convert_num_to_letters(week_id)}14/{self.convert_num_to_letters(week_id)}5',
+                    '',
+                    f'=СУММ({self.convert_num_to_letters(week_id + 1)}19:{self.convert_num_to_letters(week_id + 7)}19)',
+                    f'={self.convert_num_to_letters(week_id + 1)}15/{self.convert_num_to_letters(week_id + 1)}19',
+                    f'=СУММ({self.convert_num_to_letters(week_id + 1)}21:{self.convert_num_to_letters(week_id + 7)}21)',
+                    f'={self.convert_num_to_letters(week_id + 1)}21/{self.convert_num_to_letters(week_id + 1)}19/6'
                 ]
             )
             counter = 1

@@ -1,8 +1,11 @@
-from datetime import datetime, timedelta, timezone, date
+from datetime import datetime, timedelta, timezone
+import calendar
 
 
-def get_local_datetime():
-    return datetime.now(timezone(timedelta(hours=5)))
+def get_local_datetime(ts: int = None):
+    if not ts:
+        return datetime.now(timezone(timedelta(hours=5)))
+    return datetime.fromtimestamp(ts, timezone(timedelta(hours=5)))
 
 
 def get_today_info(dt: datetime = None):
@@ -12,6 +15,7 @@ def get_today_info(dt: datetime = None):
     start_ts = int(today.timestamp())
     end_ts = start_ts + 86399
     return start_ts, end_ts, today
+
 
 def get_last_week_list() -> list:
     week = []

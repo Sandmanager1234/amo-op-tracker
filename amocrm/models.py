@@ -49,3 +49,15 @@ class Lead:
     @classmethod
     def from_json(cls, data: dict) -> "Lead":
         ...
+
+
+class User:
+    id: int
+    group_id: int
+
+    @classmethod
+    def from_json(cls, data: dict) -> "User":
+        self: User = cls()
+        self.id = data.get('id')
+        self.group_id = data.get('rights', {}).get('group_id', 0)
+        return self

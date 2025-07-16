@@ -1,6 +1,7 @@
 import os
 import time
 import gspread
+import datetime
 from loguru import logger
 from googlesheet.template_generator import TemplateGenerator
 from gspread_formatting import set_frozen, set_column_width
@@ -33,7 +34,6 @@ class GoogleSheets:
             ws = self.get_sheet(today)
         return ws
 
-
     def create_worksheet(self, today):
         try:
             shablon, month = sg.create_shablon(today)
@@ -44,7 +44,6 @@ class GoogleSheets:
             print(ex)     
         return ws
     
-
     def get_sells(self, today):
         try:
             table = self.gc.open_by_key(os.getenv('sells_table'))
@@ -68,9 +67,9 @@ class GoogleSheets:
             logger.error(f'Не удалось получить данные о продажах. Ошибка {ex}')
             return 0, 0
         
-    
-    def insert_statistic(self, statistic: tuple, today):
+    def insert_statistic(self, statistic: tuple, mop_data: tuple, today):
         total, qual, record, meeting, selled = statistic
+        manager_count, total_calls = mop_data
         week_num, month = sg.get_weeknum(today)
         ws : gspread.Worksheet = self.get_sheet(today, month)
         sell_amount, sell_count = self.get_sells(today)
@@ -81,28 +80,75 @@ class GoogleSheets:
                 [total],
                 [f'={sg.convert_num_to_letters(col_id)}{7}/{sg.convert_num_to_letters(col_id)}{5}'],
                 [qual],
-                [f'={sg.convert_num_to_letters(col_id)}{9}/{sg.convert_num_to_letters(col_id)}{7}'],
+                '',
+                [f'={sg.convert_num_to_letters(col_id)}{10}/{sg.convert_num_to_letters(col_id)}{7}'],
                 [record],
-                [f'={sg.convert_num_to_letters(col_id)}{11}/{sg.convert_num_to_letters(col_id)}{9}'],
+                [f'={sg.convert_num_to_letters(col_id)}{12}/{sg.convert_num_to_letters(col_id)}{10}'],
                 [meeting],
-                [f'={sg.convert_num_to_letters(col_id)}{13}/{sg.convert_num_to_letters(col_id)}{11}'],
+                [f'={sg.convert_num_to_letters(col_id)}{14}/{sg.convert_num_to_letters(col_id)}{12}'],
                 [sell_count],
                 [sell_amount * 1000],
-                [f'={sg.convert_num_to_letters(col_id)}{14}/{sg.convert_num_to_letters(col_id)}{13}'],
-                [f'-']
+                [f'={sg.convert_num_to_letters(col_id)}{15}/{sg.convert_num_to_letters(col_id)}{14}'],
+                [f'-'],
+                '',
+                manager_count,
+                f'={sg.convert_num_to_letters(col_id)}15/{sg.convert_num_to_letters(col_id)}19',
+                total_calls,
+                f'={sg.convert_num_to_letters(col_id)}21/{sg.convert_num_to_letters(col_id)}19'
             ],
             f'{sg.convert_num_to_letters(col_id)}{5}:{sg.convert_num_to_letters(col_id)}{16}',
             raw=False
         )
         logger.info(f'Добавлена статистика за день: {today} в столбец {sg.convert_num_to_letters(col_id)}')
-
-
+    
+    def insert_records(self, record_statistic: dict, day_count, start_day):
+        # i need few arrays by month which i can insert in table
+        month_data = {}
+        curr_week_num = -1
+        prev_month = 0
+        while day_count > 0:
+            week_num, month = sg.get_weeknum(start_day)
+            value = record_statistic.get(
+                start_day.year, {}
+            ).get(
+                start_day.month, {}
+            ).get(
+                start_day.day
+            )
+            if value:
+                day_count -= 1
+            else:
+                value = 0
+            if month not in month_data:
+                prev_month = month
+                month_data[month] = {}
+                month_data[month]['month'] = []
+                month_data[month]['start_day'] = start_day
+                month_data[month]['start_weeknum'] = week_num
+            if curr_week_num == -1:
+                curr_week_num == week_num
+            if curr_week_num != week_num and prev_month == month:
+                week_id = 7 + 9 * week_num
+                month_data[month]['month'].extend(['', f'=СУММ({sg.convert_num_to_letters(week_id + 1)}9:{sg.convert_num_to_letters(week_id + 7)}9)',])
+            month_data[month]['month'].append(value)
+            start_day += datetime.timedelta(days=1)
+                
+        for month in month_data:
+            start_day = month_data[month]['start_day']
+            week_num = month_data[month]['start_weeknum']
+            ws = self.get_sheet(start_day, month)
+            col_id = 5 + 2 * week_num + 7 * (week_num - 1) + start_day.isoweekday()
+            ws.update(
+                month_data[month]['month'],
+                f'{sg.convert_num_to_letters(col_id)}{9}:{sg.convert_num_to_letters(col_id + len(month_data[month]["month"]))}{9}'
+            )
+            logger.info(f'Добавлена статистика за месяц: {sg.MONTH[month]} в диапазон {sg.convert_num_to_letters(col_id)}{9}:{sg.convert_num_to_letters(col_id + len(month_data[month]["month"]))}{9}')
     
     def beutify_sheet(self, ws: gspread.Worksheet):
         # MERGE CELLS
         ws.merge_cells('A1:B2')
         ws.merge_cells('A3:B4')
-        ws.merge_cells('A5:A16')
+        ws.merge_cells('A5:A22')
         ws.merge_cells('C3:C4')
         ws.merge_cells('D3:D4')
         ws.merge_cells('E3:E4')
@@ -119,12 +165,12 @@ class GoogleSheets:
             'X4:Y4', 'Z3:AF4',  
             'AG4:AH4', 'AI3:AO4',  
             'AP4:AQ4', 'AR3:AX4',  
-            'B6', 'B8', 'B10', 'B12', 'B15:B16', 'D5:D16',
-            'G5:G16', 'H6:N6', 'H8:N8', 'H10:N10', 'H12:N12', 'H15:N15',
-            'P5:P16', 'Q6:W6', 'Q8:W8', 'Q10:W10', 'Q12:W12', 'Q15:W15',
-            'Y5:Y16', 'Z6:AF6', 'Z8:AF8', 'Z10:AF10', 'Z12:AF12', 'Z15:AF15',
-            'AH5:AH16', 'AI6:AO6', 'AI8:AO8', 'AI10:AO10', 'AI12:AO12', 'AI15:AO15',
-            'AQ5:AQ16', 'AR6:AX6', 'AR8:AX8', 'AR10:AX10', 'AR12:AX12', 'AR15:AX15',
+            'B6', 'B8', 'B11', 'B13', 'B16:B17', 'B20', 'B22', 'D5:D17', 'D19:D22',
+            'G5:G17', 'G19:G22', 'H6:N6', 'H8:N8', 'H11:N11', 'H13:N13', 'H16:N16', 'H20:N20', 'H22:N22',
+            'P5:P17', 'P19:P22','Q6:W6', 'Q8:W8', 'Q11:W11', 'Q13:W13', 'Q16:W16', 'Q20:W20', 'Q22:W22',
+            'Y5:Y17', 'Y19:Y22','Z6:AF6', 'Z8:AF8', 'Z11:AF11', 'Z13:AF13', 'Z16:AF16', 'Z20:AF20', 'Z22:AF22',
+            'AH5:AH17', 'AH19:AH22','AI6:AO6', 'AI8:AO8', 'AI11:AO11', 'AI13:AO13', 'AI16:AO16', 'AI20:AO20', 'AI22:AO22',
+            'AQ5:AQ17', 'AQ19:AQ22','AR6:AX6', 'AR8:AX8', 'AR11:AX11', 'AR13:AX13', 'AR16:AX16', 'AR20:AX20', 'AR22:AX22'
             ], {
                 "backgroundColor": {
                         "red": 0,
@@ -132,6 +178,17 @@ class GoogleSheets:
                         "blue": 1
                 },
             })
+        # color cells to rgb(102, 102, 102)
+        ws.format([
+                'B18:AX18'
+            ], {
+                "backgroundColor": {
+                        "red": 0.4,
+                        "green": 0.4,
+                        "blue": 0.4
+                },
+            }
+        )
         # TEXT EDIT
         ws.format(['3:4', 'A:A'], {
             'textFormat': {
@@ -145,14 +202,14 @@ class GoogleSheets:
                 "bold": True
             }
         })
-        ws.format(['A1:AX16'], {     
+        ws.format(['A1:AX22'], {     
             'wrapStrategy': 'WRAP',
             'horizontalAlignment': 'CENTER',
             "verticalAlignment": 'MIDDLE'
         })
         # BORDERS 
         ws.format( #ALL
-            ['A3:AX16'],
+            ['A3:AX22'],
             {
                'borders': {
                     "top": {
@@ -184,7 +241,7 @@ class GoogleSheets:
         )
         ws.format(  # BOTTOM
             [
-                'A17:AX17'
+                'A23:AX23'
             ],
             {  
                 'borders': {
@@ -196,13 +253,13 @@ class GoogleSheets:
         )
         ws.format( # RIGHT SIDE
             [
-                'B6:B16',
-                'E6:E16', 'G6:G16', 
-                'N6:N16', 'P6:P16',
-                'W6:W16', 'Y6:Y16',
-                'AF6:AF16', 'AH6:AH16',
-                'AO6:AO16', 'AQ6:AQ16',
-                'AX6:AX16'
+                'B6:B22',
+                'E6:E22', 'G6:G22', 
+                'N6:N22', 'P6:P22',
+                'W6:W22', 'Y6:Y22',
+                'AF6:AF22', 'AH6:AH22',
+                'AO6:AO22', 'AQ6:AQ22',
+                'AX6:AX22'
             ],
             {
                 'borders': {
@@ -343,7 +400,7 @@ class GoogleSheets:
         )
         # CELLS FORMAT
         ws.format([
-            '6:6', '8:8', '10:10', '12:12', '16:16'
+            '6:6', '8:8', '11:11', '13:13', '17:17'
             ], {
             'numberFormat': {'type': 'PERCENT'}
         })
