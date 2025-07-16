@@ -96,7 +96,7 @@ class GoogleSheets:
                 [total_calls],
                 [f'={sg.convert_num_to_letters(col_id)}21/{sg.convert_num_to_letters(col_id)}19']
             ],
-            f'{sg.convert_num_to_letters(col_id)}{5}:{sg.convert_num_to_letters(col_id)}{16}',
+            f'{sg.convert_num_to_letters(col_id)}{5}:{sg.convert_num_to_letters(col_id)}{22}',
             raw=False
         )
         logger.info(f'Добавлена статистика за день: {today} в столбец {sg.convert_num_to_letters(col_id)}')
