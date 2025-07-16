@@ -188,10 +188,10 @@ class Database:
                         record_statistic[local_record.year] = {}
                     if local_record.month not in record_statistic[local_record.year]:
                         record_statistic[local_record.year][local_record.month] = {}
-                    if local_record.day not in record_statistic[local_record.month]:
+                    if local_record.day not in record_statistic[local_record.year][local_record.month]:
                         day_count += 1
                         record_statistic[local_record.year][local_record.month][local_record.day] = 0
-                    record_statistic[local_record.month][local_record.day] += 1
+                    record_statistic[local_record.year][local_record.month][local_record.day] += 1
                 return record_statistic, day_count
 
 

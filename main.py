@@ -72,7 +72,7 @@ async def polling_leads():
     amo_client.start_session()
     try:
         week = get_last_week_list()
-        
+    
         for _day in week:
             logger.info(f'Обработка дня: {_day}')
             # Получение даты и воронок
@@ -156,7 +156,6 @@ if __name__ == '__main__':
 
     db = Database()
     asyncio.run(start_db())
-
     while True:
         run_pending()
         time.sleep(1)
