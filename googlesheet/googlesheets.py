@@ -80,7 +80,7 @@ class GoogleSheets:
                 [total],
                 [f'={sg.convert_num_to_letters(col_id)}{7}/{sg.convert_num_to_letters(col_id)}{5}'],
                 [qual],
-                '',
+                [''],
                 [f'={sg.convert_num_to_letters(col_id)}{10}/{sg.convert_num_to_letters(col_id)}{7}'],
                 [record],
                 [f'={sg.convert_num_to_letters(col_id)}{12}/{sg.convert_num_to_letters(col_id)}{10}'],
@@ -90,11 +90,11 @@ class GoogleSheets:
                 [sell_amount * 1000],
                 [f'={sg.convert_num_to_letters(col_id)}{15}/{sg.convert_num_to_letters(col_id)}{14}'],
                 [f'-'],
-                '',
-                manager_count,
-                f'={sg.convert_num_to_letters(col_id)}15/{sg.convert_num_to_letters(col_id)}19',
-                total_calls,
-                f'={sg.convert_num_to_letters(col_id)}21/{sg.convert_num_to_letters(col_id)}19'
+                [''],
+                [manager_count],
+                [f'={sg.convert_num_to_letters(col_id)}15/{sg.convert_num_to_letters(col_id)}19'],
+                [total_calls],
+                [f'={sg.convert_num_to_letters(col_id)}21/{sg.convert_num_to_letters(col_id)}19']
             ],
             f'{sg.convert_num_to_letters(col_id)}{5}:{sg.convert_num_to_letters(col_id)}{16}',
             raw=False
@@ -139,7 +139,7 @@ class GoogleSheets:
             ws = self.get_sheet(start_day, month)
             col_id = 5 + 2 * week_num + 7 * (week_num - 1) + start_day.isoweekday()
             ws.update(
-                month_data[month]['month'],
+                [month_data[month]['month']],
                 f'{sg.convert_num_to_letters(col_id)}{9}:{sg.convert_num_to_letters(col_id + len(month_data[month]["month"]))}{9}'
             )
             logger.info(f'Добавлена статистика за месяц: {sg.MONTH[month]} в диапазон {sg.convert_num_to_letters(col_id)}{9}:{sg.convert_num_to_letters(col_id + len(month_data[month]["month"]))}{9}')
