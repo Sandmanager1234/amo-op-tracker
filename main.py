@@ -73,7 +73,7 @@ async def polling_leads():
     try:
         week = get_last_week_list()
     
-        for _day in week:
+        for i, _day in enumerate(week):
             logger.info(f'Обработка дня: {_day}')
             # Получение даты и воронок
             ts_beg, ts_end, day = get_today_info(_day)
@@ -106,12 +106,15 @@ async def polling_leads():
             diff_leads = db_leads - resp_leads
             for lead in diff_leads:
                 await db.delete_lead(lead)
-            # Получаем данные о звонках
-            users = await get_user_list()
-            mop_data = await get_mop_data(day, users)
             # Отправка в гугл
             statistic = await db.get_statistic(ts_beg, ts_end)
-            google.insert_statistic(statistic, mop_data, day)
+            if i == 0:
+                # Получаем данные о звонках
+                users = await get_user_list()
+                mop_data = await get_mop_data(day, users)
+                google.insert_statistic(statistic, day, mop_data)
+            else:
+                google.insert_statistic(statistic, day)
         start_ts, _, last_day = get_today_info(week[-1])
         record_statistic, day_count = await db.get_records(start_ts)
         google.insert_records(record_statistic, day_count, last_day)

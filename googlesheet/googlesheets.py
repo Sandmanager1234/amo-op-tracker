@@ -67,16 +67,13 @@ class GoogleSheets:
             logger.error(f'Не удалось получить данные о продажах. Ошибка {ex}')
             return 0, 0
         
-    def insert_statistic(self, statistic: tuple, mop_data: tuple, today):
+    def insert_statistic(self, statistic: tuple, today, mop_data: tuple = None):
         total, qual, record, meeting, selled = statistic
-        manager_count, total_calls = mop_data
         week_num, month = sg.get_weeknum(today)
         ws : gspread.Worksheet = self.get_sheet(today, month)
         sell_amount, sell_count = self.get_sells(today)
         col_id = 5 + 2 * week_num + 7 * (week_num - 1) + today.isoweekday()
-
-        ws.update(
-            [
+        col_data = [
                 [total],
                 [f'={sg.convert_num_to_letters(col_id)}{7}/{sg.convert_num_to_letters(col_id)}{5}'],
                 [qual],
@@ -89,13 +86,21 @@ class GoogleSheets:
                 [sell_count],
                 [sell_amount * 1000],
                 [f'={sg.convert_num_to_letters(col_id)}{15}/{sg.convert_num_to_letters(col_id)}{14}'],
-                [f'-'],
+                [f'-']
+        ]
+        if mop_data:
+            manager_count, total_calls = mop_data
+            mop_row_data = [
                 [''],
                 [manager_count],
                 [f'={sg.convert_num_to_letters(col_id)}15/{sg.convert_num_to_letters(col_id)}19'],
                 [total_calls],
                 [f'={sg.convert_num_to_letters(col_id)}21/{sg.convert_num_to_letters(col_id)}19']
-            ],
+            ]
+            col_data.extend(mop_row_data)
+
+        ws.update(
+            col_data,
             f'{sg.convert_num_to_letters(col_id)}{5}:{sg.convert_num_to_letters(col_id)}{22}',
             raw=False
         )
