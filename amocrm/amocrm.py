@@ -1,3 +1,5 @@
+
+import os
 import aiohttp
 from dotenv import load_dotenv
 from loguru import logger
@@ -157,3 +159,10 @@ class AmoCRMClient:
             params[f'filter[main_user][{i}]'] = user.id
         return await self._make_request('GET', '/stats/calls/', params=params, is_expected_html=True)
     
+    async def get_records(self, start_ts, page: int = 1):
+        params = {
+            'filter[pipeline_id][0]': os.getenv('common_pipe'),
+            'filter[custom_fields_values][693664][from]': start_ts,
+            'page': page
+        }
+        return await self._make_request('GET', '/api/v4/leads', params=params)

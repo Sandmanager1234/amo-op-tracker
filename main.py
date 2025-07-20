@@ -10,7 +10,7 @@ from database import Database
 from database.models import Lead
 from amocrm.models import User
 from amocrm import AmoCRMClient
-from kztime import get_today_info, get_last_week_list
+from kztime import get_today_info, get_last_week_list, get_local_datetime
 from googlesheet.googlesheets import GoogleSheets
 
 
@@ -68,6 +68,40 @@ async def get_mop_data(today, users):
     return count, total.text
 
 
+async def get_leads_records(start_ts: int):
+    records = {}
+    day_count = 0      
+    try:
+        response = await amo_client.get_records(start_ts)
+        leads: list = response.get('_embedded', {}).get('leads', [])
+        next_page = response.get('_links', {}).get('next', {}).get('href')
+        page = 2
+        if next_page:
+            while next_page:
+                next_response = await amo_client.get_leads(start_ts, page=page)
+                leads.extend(next_response.get('_embedded', {}).get('leads', []))
+                next_page = next_response.get('_links', {}).get('next', {}).get('href')
+                page += 1
+        for lead in leads:
+            fields = lead.get('custom_fields_values')
+            for field in fields:
+                match field.get('field_name'):
+                    case 'Время встречи':
+                        record = field.get('values', [{}])[0].get('value', -1)
+                        local_record = get_local_datetime(record)
+                        if local_record.year not in records:
+                            records[local_record.year] = {}
+                        if local_record.month not in records[local_record.year]:
+                            records[local_record.year][local_record.month] = {}
+                        if local_record.day not in records[local_record.year][local_record.month]:
+                            day_count += 1
+                            records[local_record.year][local_record.month][local_record.day] = 0
+                        records[local_record.year][local_record.month][local_record.day] += 1
+    except Exception as ex:
+        logger.error(f'Ошибка обработки записей: {ex}')
+    return records, day_count
+
+
 async def polling_leads():
     amo_client.start_session()
     try:
@@ -116,7 +150,7 @@ async def polling_leads():
             else:
                 google.insert_statistic(statistic, day)
         start_ts, _, last_day = get_today_info(week[-1])
-        record_statistic, day_count = await db.get_records(start_ts)
+        record_statistic, day_count = await get_leads_records(start_ts)
         google.insert_records(record_statistic, day_count, last_day)
     except Exception as ex:
         logger.error(f'Не получилось получить сделки. Ошибка: {ex}')

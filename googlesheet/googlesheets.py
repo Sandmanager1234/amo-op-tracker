@@ -41,7 +41,7 @@ class GoogleSheets:
             ws.insert_cols(shablon, value_input_option="USER_ENTERED")
             self.beutify_sheet(ws)
         except Exception as ex:
-            print(ex)     
+            logger.error(f'Ошибка создания таблицы РНП: {ex}')    
         return ws
     
     def get_sells(self, today):
@@ -416,3 +416,87 @@ class GoogleSheets:
         set_column_width(ws, 'B', 180)
         # FREEZE
         set_frozen(ws, cols=2)
+
+    def create_mop_sheet(self, today):
+        try:
+            shablon = sg.create_mop_shablon(today)
+            ws = self.table.add_worksheet(f'{sg.MONTH[today.month]}_ОП {today.year}', 64, 128)
+            ws.insert_cols(shablon, value_input_option="USER_ENTERED")
+            self.beautify_mop_sheet(ws)
+        except Exception as ex:
+            logger.error(f'Ошибка создания таблицы МОПов: {ex}')    
+        return ws
+    
+    def get_mop_sheet(self, today):
+        try:
+            sheet_name = f'{sg.MONTH[today.month]}_МОПы {today.year}'
+            ws = self.table.worksheet(sheet_name)
+            time.sleep(0.3)
+        except gspread.WorksheetNotFound as ex:
+            logger.warning(f'Лист {sheet_name} не найден. Ошибка: {ex}')
+            ws = self.create_worksheet(today)
+        except Exception as ex:
+            logger.warning(f'Ошибка получения листа: {ex}')
+            time.sleep(30)
+            ws = self.get_sheet(today)
+        return ws
+    
+    def beautify_mop_sheet(self, ws: gspread.Worksheet):
+        # merge cells
+        ws.merge_cells('B1:B2')
+        # set borders
+        ws.format( #ALL
+            ['A3:L3'],
+            {
+               'borders': {
+                    "top": {
+                        'style': 'SOLID'
+                    },
+                    "right": {
+                        'style': 'SOLID'
+                    },
+                    "left": {
+                        'style': 'SOLID'
+                    },
+                    "bottom": {
+                        'style': 'SOLID'
+                    }
+                } 
+            }
+        )
+        # center text
+        ws.format(['A1:L64'], {     
+            'wrapStrategy': 'WRAP',
+            'horizontalAlignment': 'CENTER',
+            "verticalAlignment": 'MIDDLE'
+        })
+        # bold text
+        ws.format(['3:3', 'B:B'], {
+            'textFormat': {
+                "fontSize": 10,
+                "bold": True
+            }
+        })
+        # color text to 
+        ws.format(
+            ['B1:B2'], 
+            {
+                "backgroundColor": {
+                        "red": 0,
+                        "green": 1,
+                        "blue": 1
+                },
+            }
+        )
+        # color text to rgb(255, 242, 204)
+        ws.format(
+            ['I3:L3'], 
+            {
+                "backgroundColor": {
+                        "red": 1.0,
+                        "green": 0.9490,
+                        "blue": 0.8
+                },
+            }
+        )
+

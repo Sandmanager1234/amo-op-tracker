@@ -68,7 +68,6 @@ class Lead(Base):
             match field.get("field_name", None):
                 case 'Время встречи':
                     self.is_record = True
-                    self.recorded_at = self.__get_value_from_json(field)
                 case 'ЗНР причина':
                     reject_reason = self.__get_value_from_json(field)
                 case _:
@@ -78,10 +77,18 @@ class Lead(Base):
             statuses.get(self.pipeline, {}).get(self.status, -1) != 11000
         ) or (
             statuses.get(self.pipeline, {}).get(self.status, -1) == 11000 and
-            reject_reason not in ['Не прошли квал', 'НД']
+            reject_reason not in ['Не прошли квал', 'НД'] # не купили после встречи
         ):
             self.is_qual = True
-        if self.status == int(os.getenv('decision_status')):
+        if (
+            self.status == int(os.getenv('decision_status'))
+        ) or (
+            (
+                statuses.get(self.pipeline, {}).get(self.status, -1) >= statuses.get(os.getenv('common_pipe'), {}).get(os.getenv('decision_status'), -1)
+            ) and (
+                reject_reason not in ['Не прошли квал', 'НД', 'Записались на встречу, но слились']
+            )
+        ):
             self.is_meeting = True
         if statuses.get(self.pipeline, {}).get(self.status, -1) > 100000:
             self.is_selled = True
@@ -130,6 +137,13 @@ class Status(Base):
         return self
 
 
+class Manager(Base):
+    __tablename__ = "managers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column()
+    group_id: Mapped[int] = mapped_column()
+    
 
 async def main():
     pass

@@ -186,7 +186,65 @@ class TemplateGenerator():
     def index_to_range(self, index):
         return chr(64 + index)
 
-
+    def create_mop_shablon(self, today):
+        cols = [
+            [
+                '',
+                '',
+                '№'
+            ],
+            [
+                f'{self.MONTH[today.month]}',
+                '',
+                'Менеджеры',
+            ],
+            [
+                '',
+                '',
+                'лидов взято в работу'
+            ],
+            [
+                '',
+                '',
+                'записи на встречу'
+            ],
+            [
+                '',
+                '',
+                'дошедшие встречи'
+            ],
+            [
+                '',
+                '',
+                'Купили'
+            ],
+            [
+                '',
+                '',
+                'Дозвоны'
+            ],
+            [
+                '',
+                '',
+                'Минуты'
+            ],
+            [
+                '',
+                '',
+                'CV % с заявки в запись'
+            ],
+            [
+                '',
+                '',
+                'CV % с записи в доходимость'
+            ],
+            [
+                '',
+                '',
+                'CV % с доходимости в продажу'
+            ],
+        ]
+        return cols
 
 # if __name__ == '__main__':
 #     # from kztime import get_local_datetime
