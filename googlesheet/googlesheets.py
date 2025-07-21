@@ -135,7 +135,7 @@ class GoogleSheets:
                 curr_week_num = week_num
             if curr_week_num != week_num and prev_month == month:
                 week_id = 7 + 9 * (week_num - 1)
-                month_data[month]['month'].extend(['', f'=СУММ({sg.convert_num_to_letters(week_id + 1)}9:{sg.convert_num_to_letters(week_id + 7)}9)',])
+                month_data[month]['month'].extend(['', f'=СУММ({sg.convert_num_to_letters(week_id + 1)}10:{sg.convert_num_to_letters(week_id + 7)}10)',])
                 curr_week_num = week_num
             month_data[month]['month'].append(value)
             start_day += datetime.timedelta(days=1)
@@ -146,7 +146,7 @@ class GoogleSheets:
             col_id = 5 + 2 * week_num + 7 * (week_num - 1) + start_day.isoweekday()
             ws.update(
                 [month_data[month]['month']],
-                f'{sg.convert_num_to_letters(col_id)}{9}:{sg.convert_num_to_letters(col_id + len(month_data[month]["month"]))}{9}',
+                f'{sg.convert_num_to_letters(col_id)}{10}:{sg.convert_num_to_letters(col_id + len(month_data[month]["month"]))}{10}',
                 raw=False
             )
             logger.info(f'Добавлена статистика за месяц: {sg.MONTH[month]} в диапазон {sg.convert_num_to_letters(col_id)}{9}:{sg.convert_num_to_letters(col_id + len(month_data[month]["month"]))}{9}')
