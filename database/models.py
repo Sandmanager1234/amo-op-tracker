@@ -73,7 +73,7 @@ class Lead(Base):
                 case _:
                     continue
         if (
-            statuses.get(self.pipeline, {}).get(self.status, -1) >= statuses.get(int(os.getenv('common_pipe')), {}).get(int(os.getenv('qual_status'))) and 
+            statuses.get(self.pipeline, {}).get(self.status, -1) >= statuses.get(int(os.getenv('common_pipe')), {}).get(int(os.getenv('qual_status', 50))) and 
             statuses.get(self.pipeline, {}).get(self.status, -1) != 11000
         ) or (
             statuses.get(self.pipeline, {}).get(self.status, -1) == 11000 and
@@ -84,7 +84,7 @@ class Lead(Base):
             self.status == int(os.getenv('decision_status'))
         ) or (
             (
-                statuses.get(self.pipeline, {}).get(self.status, -1) >= statuses.get(int(os.getenv('common_pipe')), {}).get(int(os.getenv('decision_status')), -1)
+                statuses.get(self.pipeline, {}).get(self.status, -1) >= statuses.get(int(os.getenv('common_pipe')), {}).get(int(os.getenv('decision_status')), 80)
             ) and (
                 reject_reason not in ['Не прошли квал', 'НД', 'Записались на встречу, но слились']
             )
