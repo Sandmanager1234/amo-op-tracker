@@ -47,7 +47,8 @@ class TemplateGenerator():
             weeknum = len(weeks)
         else:
             weekday = today.isoweekday()
-            weeknum = ((today - datetime.timedelta(days=weekday - 7)).day // 7)
+            day_num = today.day - weekday + 7
+            weeknum = day_num // 7
         return weeknum, month
 
     def get_formula_row(self, weeks_ids: list, row_num: int, is_avg: bool = False):

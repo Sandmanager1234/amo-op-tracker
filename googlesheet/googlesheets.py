@@ -136,7 +136,6 @@ class GoogleSheets:
                 curr_week_num = week_num
             month_data[month]['month'].append(value)
             start_day += datetime.timedelta(days=1)
-
         for month in month_data:
             start_day = month_data[month]['start_day']
             week_num = month_data[month]['start_weeknum']

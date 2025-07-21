@@ -195,4 +195,3 @@ if __name__ == '__main__':
     while True:
         run_pending()
         time.sleep(1)
-        # time.sleep(1)  # Uncomment if you want to add a delay between checks

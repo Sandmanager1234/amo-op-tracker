@@ -12,7 +12,6 @@ load_dotenv()
 async def main():
     week = get_last_week_list()
     start_ts, _, day = get_today_info(week[-1])
-    print(start_ts)
     db = Database()
     async with db.async_session() as session:
         async with session.begin():
