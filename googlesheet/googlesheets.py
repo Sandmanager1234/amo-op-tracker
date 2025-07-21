@@ -104,7 +104,7 @@ class GoogleSheets:
 
         ws.update(
             col_data,
-            f'{sg.convert_num_to_letters(col_id)}{5}:{sg.convert_num_to_letters(col_id)}{22}',
+            f'{sg.convert_num_to_letters(col_id)}{5}:{sg.convert_num_to_letters(col_id)}{25}',
             raw=False
         )
         logger.info(f'Добавлена статистика за день: {today} в столбец {sg.convert_num_to_letters(col_id)}')
