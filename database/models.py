@@ -54,6 +54,7 @@ class Lead(Base):
         self.pipeline = json_data.get('pipeline_id', '')
         self.created_at = json_data.get('created_at', '')
         self.updated_at = json_data.get('updated_at', '')
+        self.recorded_at = None
         reject_reason = ''
         self.is_deleted = False
         self.is_record = False
