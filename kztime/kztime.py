@@ -25,6 +25,3 @@ def get_last_week_list() -> list:
         today -= timedelta(days=1)
         week.append(today)
     return week
-
-
-print(len(get_last_week_list()))

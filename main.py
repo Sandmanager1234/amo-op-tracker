@@ -53,7 +53,6 @@ async def get_user_list():
     hunters = []
     for user_json in users:
         user = User.from_json(user_json)
-        print(user.id, user.group_id, os.getenv('group_id'))
         if user.group_id == int(os.getenv('group_id')):
             hunters.append(user)
     return hunters

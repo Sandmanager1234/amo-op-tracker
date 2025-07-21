@@ -246,10 +246,3 @@ class TemplateGenerator():
         ]
         return cols
 
-# if __name__ == '__main__':
-#     # from kztime import get_local_datetime
-#     tg = TemplateGenerator()
-#     today = datetime.datetime.now() - datetime.timedelta(days=3)
-#     week = tg.get_weeknum(today)
-#     print(week)
-#     # print(month)
