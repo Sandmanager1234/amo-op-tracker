@@ -73,11 +73,11 @@ class Lead(Base):
                 case _:
                     continue
         if (
-            statuses.get(self.pipeline, {}).get(self.status, -1) > 31 and 
+            statuses.get(self.pipeline, {}).get(self.status, -1) >= statuses.get(int(os.getenv('common_pipe')), {}).get(int(os.getenv('qual_status'))) and 
             statuses.get(self.pipeline, {}).get(self.status, -1) != 11000
         ) or (
             statuses.get(self.pipeline, {}).get(self.status, -1) == 11000 and
-            reject_reason not in ['Не прошли квал', 'НД'] # не купили после встречи
+            reject_reason not in ['Не прошли квал', 'НД'] 
         ):
             self.is_qual = True
         if (
