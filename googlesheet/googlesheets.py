@@ -118,12 +118,10 @@ class GoogleSheets:
             ).get(
                 start_day.month, {}
             ).get(
-                start_day.day
+                start_day.day, 0
             )
-            if value:
+            if value != 0:
                 day_count -= 1
-            else:
-                value = 0
             if month not in month_data:
                 prev_month = month
                 month_data[month] = {}

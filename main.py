@@ -78,7 +78,7 @@ async def get_leads_records(start_ts: int):
         page = 2
         if next_page:
             while next_page:
-                next_response = await amo_client.get_leads(start_ts, page=page)
+                next_response = await amo_client.get_records(start_ts, page=page)
                 leads.extend(next_response.get('_embedded', {}).get('leads', []))
                 next_page = next_response.get('_links', {}).get('next', {}).get('href')
                 page += 1
