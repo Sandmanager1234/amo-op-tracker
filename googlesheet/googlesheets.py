@@ -68,7 +68,7 @@ class GoogleSheets:
             return 0, 0
         
     def insert_statistic(self, statistic: tuple, today, mop_data: tuple = None):
-        total, qual, record, meeting, selled = statistic
+        total, qual, qual_back, record, record_back, meeting, meeting_back, selled = statistic
         week_num, month = sg.get_weeknum(today)
         ws : gspread.Worksheet = self.get_sheet(today, month)
         sell_amount, sell_count = self.get_sells(today)
@@ -77,15 +77,18 @@ class GoogleSheets:
                 [total],
                 [f'={sg.convert_num_to_letters(col_id)}{7}/{sg.convert_num_to_letters(col_id)}{5}'],
                 [qual],
-                [f'={sg.convert_num_to_letters(col_id)}{10}/{sg.convert_num_to_letters(col_id)}{7}'],
+                [qual_back],
+                [f'={sg.convert_num_to_letters(col_id)}{11}/{sg.convert_num_to_letters(col_id)}{7}'],
                 [''],
                 [record],
-                [f'={sg.convert_num_to_letters(col_id)}{12}/{sg.convert_num_to_letters(col_id)}{10}'],
+                [record_back],
+                [f'={sg.convert_num_to_letters(col_id)}{14}/{sg.convert_num_to_letters(col_id)}{11}'],
                 [meeting],
-                [f'={sg.convert_num_to_letters(col_id)}{14}/{sg.convert_num_to_letters(col_id)}{12}'],
+                [meeting_back],
+                [f'={sg.convert_num_to_letters(col_id)}{17}/{sg.convert_num_to_letters(col_id)}{14}'],
                 [sell_count],
                 [sell_amount * 1000],
-                [f'={sg.convert_num_to_letters(col_id)}{15}/{sg.convert_num_to_letters(col_id)}{14}'],
+                [f'={sg.convert_num_to_letters(col_id)}{18}/{sg.convert_num_to_letters(col_id)}{17}'],
                 [f'-']
         ]
         if mop_data:
@@ -93,9 +96,9 @@ class GoogleSheets:
             mop_row_data = [
                 [''],
                 [manager_count],
-                [f'={sg.convert_num_to_letters(col_id)}15/{sg.convert_num_to_letters(col_id)}19'],
+                [f'={sg.convert_num_to_letters(col_id)}18/{sg.convert_num_to_letters(col_id)}22'],
                 [total_calls],
-                [f'={sg.convert_num_to_letters(col_id)}21/{sg.convert_num_to_letters(col_id)}19']
+                [f'={sg.convert_num_to_letters(col_id)}24/{sg.convert_num_to_letters(col_id)}22']
             ]
             col_data.extend(mop_row_data)
 

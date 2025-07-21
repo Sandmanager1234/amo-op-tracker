@@ -1,7 +1,7 @@
 import os
 import sqlalchemy
 from sqlalchemy.sql import func
-from database.models import Base, Lead, Status
+from models import Base, Lead, Status
 from loguru import logger
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from kztime import get_local_datetime
@@ -123,6 +123,27 @@ class Database:
                         Lead.created_at <= end_ts
                     )
                 )
+                qual_back = await session.execute(
+                    sqlalchemy.select(
+                        func.count()
+                    ).select_from(
+                        Lead
+                    ).join(
+                        Status, Status.status_id == Lead.status
+                    ).where(
+                        Lead.is_deleted == False,
+                        Lead.is_qual == True,
+                        Lead.created_at >= start_ts,
+                        Lead.created_at <= end_ts,
+                        Status.sort_type < sqlalchemy.select(
+                            Status.sort_type
+                        ).select_from(
+                            Status
+                        ).where(
+                            Status.name == 'Квалификация пройдена'
+                        ).scalar_subquery()
+                    )
+                )
                 record = await session.execute(
                     sqlalchemy.select(
                         func.count()
@@ -133,6 +154,19 @@ class Database:
                         Lead.is_record == True,
                         Lead.created_at >= start_ts,
                         Lead.created_at <= end_ts
+                    )
+                )
+                record_back = await session.execute(
+                    sqlalchemy.select(
+                        func.count()
+                    ).select_from(
+                        Lead
+                    ).where(
+                        Lead.is_deleted == False,
+                        Lead.is_record == True,
+                        Lead.created_at >= start_ts,
+                        Lead.created_at <= end_ts,
+                        Lead.recorded_at == None
                     )
                 )
                 meeting = await session.execute(
@@ -147,6 +181,28 @@ class Database:
                         Lead.created_at <= end_ts
                     )
                 )
+                meeting_back = await session.execute(
+                    sqlalchemy.select(
+                        func.count()
+                    ).select_from(
+                        Lead
+                    ).join(
+                        Status, Status.status_id == Lead.status
+                    ).where(
+                        Lead.is_deleted == False,
+                        Lead.is_meeting == True,
+                        Lead.created_at >= start_ts,
+                        Lead.created_at <= end_ts,
+                        Status.sort_type < sqlalchemy.select(
+                            Status.sort_type
+                        ).select_from(
+                            Status
+                        ).where(
+                            Status.name == 'Принимает решение'
+                        ).scalar_subquery()
+                    )
+                )
+                
                 selled = await session.execute(
                     sqlalchemy.select(
                         func.count()
@@ -162,8 +218,11 @@ class Database:
                 return (
                     total.scalars().first(),
                     qual.scalars().first(),
+                    qual_back.scalars().first(),
                     record.scalars().first(),
+                    record_back.scalars().first(),
                     meeting.scalars().first(),
+                    meeting_back.scalars().first(),
                     selled.scalars().first()
                 )
             
@@ -195,13 +254,14 @@ class Database:
                 return record_statistic, day_count
 
 
-async def test():
-    db = Database()
-    # await db.update_status(11)
+# async def test():
+#     db = Database()
+#     s_ts, e_ts, _ = 1753038000, 1753124399, 0
+#     await db.get_statistic(s_ts, e_ts)
 
 
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(test())
+# if __name__ == "__main__":
+#     import asyncio
+#     asyncio.run(test())
 
-    logger.info("Скрипт завершен")
+#     logger.info("Скрипт завершен")

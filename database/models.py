@@ -68,6 +68,7 @@ class Lead(Base):
             match field.get("field_name", None):
                 case 'Время встречи':
                     self.is_record = True
+                    self.recorded_at = self.__get_value_from_json(field)
                 case 'ЗНР причина':
                     reject_reason = self.__get_value_from_json(field)
                 case _:
