@@ -144,7 +144,7 @@ class TemplateGenerator():
                     f'={self.convert_num_to_letters(week_id)}15/{self.convert_num_to_letters(week_id)}14',
                     f'={self.convert_num_to_letters(week_id)}14/{self.convert_num_to_letters(week_id)}5',
                     '',
-                    f'=СУММ({self.convert_num_to_letters(week_id + 1)}19:{self.convert_num_to_letters(week_id + 7)}19)',
+                    f'=СУММ({self.convert_num_to_letters(week_id + 1)}19:{self.convert_num_to_letters(week_id + 7)}19)/7',
                     f'={self.convert_num_to_letters(week_id + 1)}15/{self.convert_num_to_letters(week_id + 1)}19',
                     f'=СУММ({self.convert_num_to_letters(week_id + 1)}21:{self.convert_num_to_letters(week_id + 7)}21)',
                     f'={self.convert_num_to_letters(week_id + 1)}21/{self.convert_num_to_letters(week_id + 1)}19/6'
