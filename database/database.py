@@ -1,7 +1,7 @@
 import os
 import sqlalchemy
 from sqlalchemy.sql import func
-from models import Base, Lead, Status
+from database.models import Base, Lead, Status
 from loguru import logger
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from kztime import get_local_datetime
