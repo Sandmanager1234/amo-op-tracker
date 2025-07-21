@@ -84,7 +84,7 @@ class Lead(Base):
             self.status == int(os.getenv('decision_status'))
         ) or (
             (
-                statuses.get(self.pipeline, {}).get(self.status, -1) >= statuses.get(os.getenv('common_pipe'), {}).get(os.getenv('decision_status'), -1)
+                statuses.get(self.pipeline, {}).get(self.status, -1) >= statuses.get(int(os.getenv('common_pipe')), {}).get(int(os.getenv('decision_status')), -1)
             ) and (
                 reject_reason not in ['Не прошли квал', 'НД', 'Записались на встречу, но слились']
             )
