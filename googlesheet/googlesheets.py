@@ -155,7 +155,7 @@ class GoogleSheets:
         # MERGE CELLS
         ws.merge_cells('A1:B2')
         ws.merge_cells('A3:B4')
-        ws.merge_cells('A5:A22')
+        ws.merge_cells('A5:A25')
         ws.merge_cells('C3:C4')
         ws.merge_cells('D3:D4')
         ws.merge_cells('E3:E4')
@@ -164,7 +164,7 @@ class GoogleSheets:
         ws.merge_cells('X3:Y3')
         ws.merge_cells('AG3:AH3')
         ws.merge_cells('AP3:AQ3')
-        # COLOR CELLS to rgb(0, 255, 255)
+        # COLOR CELLS to rgb(0, 255, 255) CYAN
         ws.format([
             'A3:E4', 
             'F4:G4', 'H3:N4', 
@@ -172,12 +172,12 @@ class GoogleSheets:
             'X4:Y4', 'Z3:AF4',  
             'AG4:AH4', 'AI3:AO4',  
             'AP4:AQ4', 'AR3:AX4',  
-            'B6', 'B8', 'B11', 'B13', 'B16:B17', 'B20', 'B22', 'D5:D17', 'D19:D22',
-            'G5:G17', 'G19:G22', 'H6:N6', 'H8:N8', 'H11:N11', 'H13:N13', 'H16:N16', 'H20:N20', 'H22:N22',
-            'P5:P17', 'P19:P22','Q6:W6', 'Q8:W8', 'Q11:W11', 'Q13:W13', 'Q16:W16', 'Q20:W20', 'Q22:W22',
-            'Y5:Y17', 'Y19:Y22','Z6:AF6', 'Z8:AF8', 'Z11:AF11', 'Z13:AF13', 'Z16:AF16', 'Z20:AF20', 'Z22:AF22',
-            'AH5:AH17', 'AH19:AH22','AI6:AO6', 'AI8:AO8', 'AI11:AO11', 'AI13:AO13', 'AI16:AO16', 'AI20:AO20', 'AI22:AO22',
-            'AQ5:AQ17', 'AQ19:AQ22','AR6:AX6', 'AR8:AX8', 'AR11:AX11', 'AR13:AX13', 'AR16:AX16', 'AR20:AX20', 'AR22:AX22'
+            'B6', 'B8', 'B11', 'B13', 'B19:B20', 'B23', 'B25', 'D5:D20', 'D22:D25',
+            'G5:G20', 'G22:G25', 'H6:N6', 'H9:N9', 'H13:N13', 'H16:N16', 'H19:N19', 'H23:N23', 'H25:N25',
+            'P5:P20', 'P22:P25','Q6:W6', 'Q9:W9', 'Q13:W13', 'Q16:W16', 'Q19:W19', 'Q23:W23', 'Q25:W25',
+            'Y5:Y20', 'Y22:Y25','Z6:AF6', 'Z9:AF9', 'Z13:AF13', 'Z16:AF16', 'Z19:AF19', 'Z23:AF23', 'Z25:AF25',
+            'AH5:AH20', 'AH22:AH25','AI6:AO6', 'AI9:AO9', 'AI13:AO13', 'AI16:AO16', 'AI19:AO19', 'AI23:AO23', 'AI25:AO25',
+            'AQ5:AQ20', 'AQ22:AQ25','AR6:AX6', 'AR9:AX9', 'AR13:AX13', 'AR16:AX16', 'AR19:AX19', 'AR23:AX23', 'AR25:AX25'
             ], {
                 "backgroundColor": {
                         "red": 0,
@@ -185,9 +185,9 @@ class GoogleSheets:
                         "blue": 1
                 },
             })
-        # color cells to rgb(102, 102, 102)
+        # color cells to rgb(102, 102, 102) GREY
         ws.format([
-                'B18:AX18'
+                'B21:AX21'
             ], {
                 "backgroundColor": {
                         "red": 0.4,
@@ -209,14 +209,14 @@ class GoogleSheets:
                 "bold": True
             }
         })
-        ws.format(['A1:AX22'], {     
+        ws.format(['A1:AX25'], {     
             'wrapStrategy': 'WRAP',
             'horizontalAlignment': 'CENTER',
             "verticalAlignment": 'MIDDLE'
         })
         # BORDERS 
         ws.format( #ALL
-            ['A3:AX22'],
+            ['A3:AX25'],
             {
                'borders': {
                     "top": {
@@ -248,7 +248,7 @@ class GoogleSheets:
         )
         ws.format(  # BOTTOM
             [
-                'A23:AX23'
+                'A26:AX26'
             ],
             {  
                 'borders': {
@@ -260,13 +260,13 @@ class GoogleSheets:
         )
         ws.format( # RIGHT SIDE
             [
-                'B6:B22',
-                'E6:E22', 'G6:G22', 
-                'N6:N22', 'P6:P22',
-                'W6:W22', 'Y6:Y22',
-                'AF6:AF22', 'AH6:AH22',
-                'AO6:AO22', 'AQ6:AQ22',
-                'AX6:AX22'
+                'B6:B25',
+                'E6:E25', 'G6:G25', 
+                'N6:N25', 'P6:P25',
+                'W6:W25', 'Y6:Y25',
+                'AF6:AF25', 'AH6:AH25',
+                'AO6:AO25', 'AQ6:AQ25',
+                'AX6:AX25'
             ],
             {
                 'borders': {
@@ -407,7 +407,7 @@ class GoogleSheets:
         )
         # CELLS FORMAT
         ws.format([
-            '6:6', '8:8', '11:11', '13:13', '17:17'
+            '6:6', '9:9', '13:13', '16:16', '20:20'
             ], {
             'numberFormat': {'type': 'PERCENT'}
         })
