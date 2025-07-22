@@ -157,6 +157,11 @@ async def polling_leads():
         await amo_client.close_session()
 
 
+@repeat(every().week)
+def update_statuses():
+    asyncio.run(set_statuses())
+
+
 @repeat(every(5).minutes)
 def main():
     asyncio.run(polling_leads())

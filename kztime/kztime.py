@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-import calendar
 
 
 def get_local_datetime(ts: int = None):
