@@ -52,8 +52,8 @@ class GoogleSheets:
             margin = ws.find('КОЛ-ВО ОПЛАТ')
             row_id = margin.row - 1
             col_id = 2 + today.day
-            sell_amount = ws.cell(row_id, col_id).value
-            sell_count = ws.cell(row_id + 1, col_id).value
+            sell_amount = ws.cell(row_id, col_id).value.replace(',', '.')
+            sell_count = ws.cell(row_id + 1, col_id).value.replace(',', '.')
             if not sell_amount:
                 sell_amount = 0
             else:
