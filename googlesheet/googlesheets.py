@@ -52,16 +52,16 @@ class GoogleSheets:
             margin = ws.find('КОЛ-ВО ОПЛАТ')
             row_id = margin.row - 1
             col_id = 2 + today.day
-            sell_amount = ws.cell(row_id, col_id).value.replace(',', '.')
-            sell_count = ws.cell(row_id + 1, col_id).value.replace(',', '.')
+            sell_amount = ws.cell(row_id, col_id).value
+            sell_count = ws.cell(row_id + 1, col_id).value
             if not sell_amount:
                 sell_amount = 0
             else:
-                sell_amount = float(sell_amount.replace(' ', ''))
+                sell_amount = float(sell_amount.replace(' ', '').replace(',', '.'))
             if not sell_count:
                 sell_count = 0
             else:
-                sell_count = int(sell_count.replace(' ', ''))
+                sell_count = int(sell_count.replace(' ', '').replace(',', '.'))
             return sell_amount, sell_count
         except Exception as ex:
             logger.error(f'Не удалось получить данные о продажах. Ошибка {ex}')
